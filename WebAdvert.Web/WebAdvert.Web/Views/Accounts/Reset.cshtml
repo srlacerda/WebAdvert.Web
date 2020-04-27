@@ -1,0 +1,26 @@
+﻿@model WebAdvert.Web.Models.Accounts.ResetModel
+
+@{
+    ViewData["Title"] = "Reset Password";
+}
+<div class="row">
+    <div class="col-md-7">
+        <h5 class="alert alert-info">
+            <img src="http://www.icon100.com/up/2625/128/login.png" style="width: 32px;" />
+            Reset your password
+        </h5>
+        <div asp-validation-summary="All" class="text-danger" />
+        <form method="post" asp-controller="Accounts" asp-action="Reset">
+            <div class="form-group">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <button type="submit">Reset</button>
+           @* @Html.ValidationSummary(false, "", new { @class = "text-danger" })*@
+        </form>
+
+
+    </div>
+</div>

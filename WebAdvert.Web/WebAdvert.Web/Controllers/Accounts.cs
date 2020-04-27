@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebAdvert.Web.Models.Accounts;
 using Amazon.AspNetCore.Identity.Cognito;
 using Amazon.CognitoIdentityProvider.Model;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -38,7 +39,7 @@ namespace WebAdvert.Web.Controllers
                 var user = _pool.GetUser(model.Email);
                 if (user.Status != null)
                 {
-                    ModelState.AddModelError("UserExists", "User with this email already exists");
+                    ModelState.AddModelError(string.Empty, "User with this email already exists");
                     return View(model);
                 }
 
@@ -46,6 +47,7 @@ namespace WebAdvert.Web.Controllers
                 //var createdUser = await (_userManager as CognitoUserManager<CognitoUser>).CreateAsync(user, model.Password).ConfigureAwait(false);
                 var createdUser = await _userManager.CreateAsync(user, model.Password).ConfigureAwait(false);
                 if (createdUser.Succeeded) return RedirectToAction("Confirm");
+
             }
             return View(model);
         }
@@ -65,7 +67,7 @@ namespace WebAdvert.Web.Controllers
                 var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false);
                 if (user == null)
                 {
-                    ModelState.AddModelError("NotFound", "An user with the giver email address was not found");
+                    ModelState.AddModelError(string.Empty, "An user with the giver email address was not found");
                     return View(model);
                 }
 
@@ -112,6 +114,70 @@ namespace WebAdvert.Web.Controllers
             }
 
             return View("Login", model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Reset(ResetModel model)
+        {
+            return View(model);
+        }
+
+        [HttpPost]
+        [ActionName("Reset")]
+        public async Task<IActionResult> ResetPost(ResetModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = _pool.GetUser(model.Email);
+                if (user.Status != null)
+                {
+                    ModelState.AddModelError(string.Empty, "User with this email already exists");
+                    return View(model);
+                }
+
+                var result =  user.ForgotPasswordAsync();
+                if (result != null)
+                {
+                    return RedirectToAction("ConfirmReset", "Accounts");
+                }
+
+
+                ModelState.AddModelError(string.Empty, "did not possible reset your password");
+            }
+
+            return View("Login", model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmReset(ConfirmResetModel model)
+        {
+            return View(model);
+        }
+
+        [HttpPost]
+        [ActionName("ConfirmReset")]
+        public async Task<IActionResult> ConfirmResetPost(ConfirmResetModel model)
+        {
+
+            if (ModelState.IsValid)
+            {
+                var user = _pool.GetUser(model.Email);
+                if (user.Status != null)
+                {
+                    ModelState.AddModelError(string.Empty, "User with this email already exists");
+                    return View(model);
+                }
+
+                Task result = user.ConfirmForgotPasswordAsync(model.Code, model.Password);
+                if (result != null)
+                {
+                    return RedirectToAction("Login", "Accounts");
+                }
+
+                ModelState.AddModelError(string.Empty, "did not possible reset your password");
+            }
+
+            return RedirectToAction("Login", "Accounts");
         }
     }
 }
