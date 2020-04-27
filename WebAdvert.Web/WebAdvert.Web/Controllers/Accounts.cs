@@ -90,5 +90,28 @@ namespace WebAdvert.Web.Controllers
 
             return View(model);
         }
+
+        [HttpGet]
+        //public IActionResult Login(LoginModel model)
+        public async Task<IActionResult> Login(LoginModel model)
+        {
+            return View(model);
+        }
+
+        [HttpPost]
+        [ActionName("Login")]
+        public async Task<IActionResult> LoginPost(LoginModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _signInManager.PasswordSignInAsync(model.Email,
+                    model.Password, model.RememberMe, false).ConfigureAwait(false);
+                if (result.Succeeded)
+                    return RedirectToAction("Index", "Home");
+                ModelState.AddModelError("LoginError", "Email and password do not match");
+            }
+
+            return View("Login", model);
+        }
     }
 }
