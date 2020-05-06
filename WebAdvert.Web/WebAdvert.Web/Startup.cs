@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Extensions.Http;
+using WebAdvert.Web.Classes;
 using WebAdvert.Web.ServiceClients;
 using WebAdvert.Web.Services;
 
@@ -54,6 +56,10 @@ namespace WebAdvert.Web
             {
                 options.LoginPath = "/Accounts/Login";
             });
+
+            //services.AddAutoMapper();
+            services.AddAutoMapper(typeof(WebsiteProfiles));
+            services.AddAutoMapper(typeof(AdvertApiProfile));
 
             services.AddTransient<IFileUploader, S3FileUploader>();
             services.AddHttpClient<IAdvertApiClient, AdvertApiClient>()

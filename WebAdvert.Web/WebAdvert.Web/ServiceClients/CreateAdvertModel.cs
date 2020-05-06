@@ -14,5 +14,8 @@ namespace WebAdvert.Web.ServiceClients
         public double Price { get; set; }
 
         public string UserName { get; set; }
+
+        public string FilePath { get; set; }
+        public string Id { get; set; }
     }
 }
