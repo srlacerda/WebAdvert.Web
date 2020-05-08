@@ -40,7 +40,8 @@ namespace WebAdvert.Web
             });
 
             //services.AddCognitoIdentity();
-            services.AddCognitoIdentity(config => { 
+            services.AddCognitoIdentity(config =>
+            {
                 config.Password = new Microsoft.AspNetCore.Identity.PasswordOptions
                 {
                     RequireDigit = false,
@@ -66,6 +67,10 @@ namespace WebAdvert.Web
                 .AddPolicyHandler(GetRetryPolicy())
                 .AddPolicyHandler(GetCircuitBreakerPatternPolicy());
 
+            services.AddHttpClient<ISearchApiClient, SearchApiClient>()
+                .AddPolicyHandler(GetRetryPolicy())
+                .AddPolicyHandler(GetCircuitBreakerPatternPolicy());
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
@@ -77,7 +82,7 @@ namespace WebAdvert.Web
         private IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
         {
             return HttpPolicyExtensions.HandleTransientHttpError().OrResult(msg => msg.StatusCode == HttpStatusCode.NotFound)
-                .WaitAndRetryAsync(5, retryAttempy => TimeSpan.FromSeconds(Math.Pow(2,retryAttempy)));
+                .WaitAndRetryAsync(5, retryAttempy => TimeSpan.FromSeconds(Math.Pow(2, retryAttempy)));
 
         }
 
