@@ -62,5 +62,12 @@ namespace WebAdvert.Web.ServiceClients
             var advertResponse = _mapper.Map<AdvertResponse>(createAdvertResponse); 
             return advertResponse;
         }
+
+        public async Task<List<Advertisement>> GetAllAsync()
+        {
+            var apiCallResponse = await _client.GetAsync(new Uri($"{_baseAddress}/all")).ConfigureAwait(false);
+            var allAdvertModels = await apiCallResponse.Content.ReadAsAsync<List<AdvertModel>>().ConfigureAwait(false);
+            return allAdvertModels.Select(x => _mapper.Map<Advertisement>(x)).ToList();
+        }
     }
 }

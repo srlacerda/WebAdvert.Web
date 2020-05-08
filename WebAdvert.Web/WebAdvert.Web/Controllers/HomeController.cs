@@ -25,10 +25,19 @@ namespace WebAdvert.Web.Controllers
             ApiClient = apiClient;
         }
 
+        //[Authorize]
+        //public IActionResult Index()
+        //{
+        //    return View();
+        //}
         [Authorize]
-        public IActionResult Index()
+        [ResponseCache(Duration = 60)]
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var allAds = await ApiClient.GetAllAsync().ConfigureAwait(false);
+            var allViewModels = allAds.Select(x => Mapper.Map<IndexViewModel>(x));
+
+            return View(allViewModels);
         }
 
         public IActionResult Privacy()
