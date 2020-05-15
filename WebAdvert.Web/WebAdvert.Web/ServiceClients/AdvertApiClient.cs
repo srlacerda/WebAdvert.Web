@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using AdvertApi.Models;
+using Amazon.ServiceDiscovery;
+using Amazon.ServiceDiscovery.Model;
 using AutoMapper;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
@@ -20,24 +22,32 @@ namespace WebAdvert.Web.ServiceClients
         private readonly IMapper _mapper;
         public AdvertApiClient(IConfiguration configuration, HttpClient client, IMapper mapper)
         {
-            //_configuration = configuration;
             _client = client;
             _mapper = mapper;
+
+
+            var discoveryClient = new AmazonServiceDiscoveryClient();
+            var discoveryTask =  discoveryClient.DiscoverInstancesAsync(new DiscoverInstancesRequest()
+            {
+                ServiceName = "advertapi",
+                NamespaceName = "WebAdvertisement"
+            });
+            discoveryTask.Wait();
+
+            var instances = discoveryTask.Result.Instances; //randomize
+            var ipv4 = instances[0].Attributes["AWS_INSTANCE_IPV4"];
+            var port = instances[0].Attributes["AWS_INSTANCE_PORT"];
 
             _baseAddress = configuration.GetSection("AdvertApi").GetValue<string>("BaseUrl");
 
             //var createUrl = _configuration.GetSection("AdvertApi").GetValue<string>("BaseUrl");
             //_client.BaseAddress = new Uri(createUrl);
-            //_client.DefaultRequestHeaders.Add("Content-type", "application/json");
         }
 
         public async Task<bool> ConfirmAsync(ConfirmAdvertRequest model)
         {
             var advertModel = _mapper.Map<ConfirmAdvertModel>(model);
             var jsonModel = JsonConvert.SerializeObject(advertModel);
-            //var response = await _client
-            //    .PutAsync(new Uri($"{_baseAddress}/confirm"), new StringContent(jsonModel))
-            //    .ConfigureAwait(false);
             var response = await _client
                 .PutAsync(new Uri($"{_baseAddress}/confirm"),
                     new StringContent(jsonModel, Encoding.UTF8, "application/json"))
@@ -50,10 +60,6 @@ namespace WebAdvert.Web.ServiceClients
         {
             var advertApiModel =  _mapper.Map<AdvertModel>(model); 
             var jsonModel = JsonConvert.SerializeObject(advertApiModel);
-            //var response = await _client.PostAsync(_client.BaseAddress, new StringContent(jsonModel)).ConfigureAwait(false);
-            //var response = await _client
-            //    .PostAsync(new Uri($"{_baseAddress}/create"), new StringContent(jsonModel))
-            //    .ConfigureAwait(false);
             var response = await _client.PostAsync(new Uri($"{_baseAddress}/create"),
                 new StringContent(jsonModel, Encoding.UTF8, "application/json")).ConfigureAwait(false);
 
