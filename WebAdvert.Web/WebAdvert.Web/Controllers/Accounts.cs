@@ -106,11 +106,20 @@ namespace WebAdvert.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Email,
-                    model.Password, model.RememberMe, false).ConfigureAwait(false);
-                if (result.Succeeded)
-                    return RedirectToAction("Index", "Home");
-                ModelState.AddModelError("LoginError", "Email and password do not match");
+                try
+                {
+                    var result = await _signInManager.PasswordSignInAsync(model.Email,
+                                        model.Password, model.RememberMe, false).ConfigureAwait(false);
+                    if (result.Succeeded)
+                        return RedirectToAction("Index", "Home");
+                    ModelState.AddModelError("LoginError", "Email and password do not match");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    throw;
+                }
+                
             }
 
             return View("Login", model);
